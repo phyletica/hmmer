@@ -727,10 +727,12 @@ p7_Pipeline(P7_PIPELINE *pli, P7_OPROFILE *om, P7_BG *bg, const ESL_SQ *sq, cons
       if ((status = p7_pli_NewModelThresholds(pli, om)) != eslOK) return status; /* pli->errbuf has err msg set */
     }
 
+  // Always calc Viterbi score
+  p7_ViterbiFilter(sq->dsq, sq->n, om, pli->oxf, &vfsc);
   /* Second level filter: ViterbiFilter(), multihit with <om> */
   if (P > pli->F2)
     {
-      p7_ViterbiFilter(sq->dsq, sq->n, om, pli->oxf, &vfsc);  
+      // p7_ViterbiFilter(sq->dsq, sq->n, om, pli->oxf, &vfsc);
       seq_score = (vfsc-filtersc) / eslCONST_LOG2;
       P  = esl_gumbel_surv(seq_score,  om->evparam[p7_VMU],  om->evparam[p7_VLAMBDA]);
       if (P > pli->F2) return eslOK;
@@ -846,6 +848,10 @@ p7_Pipeline(P7_PIPELINE *pli, P7_OPROFILE *om, P7_BG *bg, const ESL_SQ *sq, cons
 
       hit->sum_score  = sum_score; /* BITS */
       hit->sum_lnP    = esl_exp_logsurv (hit->sum_score,  om->evparam[p7_FTAU], om->evparam[p7_FLAMBDA]);
+
+      // Add foward score (in nats) and approx Viterbi score
+      hit->fwd_score = fwdsc;
+      hit->approx_viterbi_score = vfsc;
 
       /* Transfer all domain coordinates (unthresholded for
        * now) with their alignment displays to the hit list,

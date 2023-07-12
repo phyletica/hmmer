@@ -717,6 +717,8 @@ typedef struct p7_hit_s {
   float  score;			/* bit score of the sequence (all domains, w/ correction) */
   float  pre_score;		/* bit score of sequence before null2 correction          */
   float  sum_score;		/* bit score reconstructed from sum of domain envelopes   */
+  float  fwd_score;		/* forward score in nats   */
+  float  approx_viterbi_score;		/* Approximate Viterbi score   */
 
   double lnP;		        /* log(P-value) of the score               */
   double pre_lnP;		/* log(P-value) of the pre_score           */

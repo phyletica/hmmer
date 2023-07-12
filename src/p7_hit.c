@@ -48,6 +48,8 @@ extern P7_HIT *p7_hit_Create_empty(){
   the_hit->score = 0.0;
   the_hit->pre_score = 0.0;
   the_hit->sum_score = 0.0;
+  the_hit->fwd_score = 0.0;
+  the_hit->approx_viterbi_score = 0.0;
   the_hit->lnP = 0.0;
   the_hit->pre_lnP = 0.0;
   the_hit->sum_lnP = 0.0;
@@ -242,6 +244,16 @@ extern int p7_hit_Serialize(const P7_HIT *obj, uint8_t **buf, uint32_t *n, uint3
   memcpy((void *) ptr, (void *) &network_32bit, sizeof(obj->sum_score));
   ptr += sizeof(obj->sum_score);
 
+  // fwd_score
+  network_32bit = esl_hton32(*((uint32_t *) &(obj->fwd_score)));
+  memcpy((void *) ptr, (void *) &network_32bit, sizeof(obj->fwd_score));
+  ptr += sizeof(obj->fwd_score);
+
+  // approx_viterbi_score
+  network_32bit = esl_hton32(*((uint32_t *) &(obj->approx_viterbi_score)));
+  memcpy((void *) ptr, (void *) &network_32bit, sizeof(obj->approx_viterbi_score));
+  ptr += sizeof(obj->approx_viterbi_score);
+
   // Field 7: lnP
   network_64bit = esl_hton64(*((uint64_t *) &(obj->lnP)));  
   memcpy((void *) ptr, (void *) &network_64bit, sizeof(obj->lnP));
@@ -424,6 +436,18 @@ extern int p7_hit_Deserialize(const uint8_t *buf, uint32_t *n, P7_HIT *ret_obj){
   memcpy(&network_32bit, ptr, sizeof(float)); // Grab the bytes out of the buffer
   host_32bit = esl_ntoh32(network_32bit);
   ret_obj->sum_score = *((float *) &host_32bit);
+  ptr += sizeof(float);
+
+  // fwd_score
+  memcpy(&network_32bit, ptr, sizeof(float)); // Grab the bytes out of the buffer
+  host_32bit = esl_ntoh32(network_32bit);
+  ret_obj->fwd_score = *((float *) &host_32bit);
+  ptr += sizeof(float);
+
+  // approx_viterbi_score
+  memcpy(&network_32bit, ptr, sizeof(float)); // Grab the bytes out of the buffer
+  host_32bit = esl_ntoh32(network_32bit);
+  ret_obj->approx_viterbi_score = *((float *) &host_32bit);
   ptr += sizeof(float);
 
   //Field 7: lnP
@@ -653,6 +677,8 @@ extern int p7_hit_TestSample(ESL_RAND64 *rng, P7_HIT **ret_obj){
   the_obj->score = (float) esl_rand64_double(rng);
   the_obj->pre_score = (float) esl_rand64_double(rng);
   the_obj->sum_score = (float) esl_rand64_double(rng);
+  the_obj->fwd_score = (float) esl_rand64_double(rng);
+  the_obj->approx_viterbi_score = (float) esl_rand64_double(rng);
   the_obj->lnP = esl_rand64_double(rng);
   the_obj->pre_lnP = esl_rand64_double(rng);
   the_obj->sum_lnP = esl_rand64_double(rng);
@@ -746,6 +772,14 @@ extern int p7_hit_Compare(P7_HIT *first, P7_HIT *second, double atol, double rto
   }
 
   if(esl_FCompareNew(first->sum_score, second->sum_score, (float) atol, (float) rtol) != eslOK){
+    return eslFAIL;
+  }
+
+  if(esl_FCompareNew(first->fwd_score, second->fwd_score, (float) atol, (float) rtol) != eslOK){
+    return eslFAIL;
+  }
+
+  if(esl_FCompareNew(first->approx_viterbi_score, second->approx_viterbi_score, (float) atol, (float) rtol) != eslOK){
     return eslFAIL;
   }
 
